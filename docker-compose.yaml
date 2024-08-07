@@ -1,0 +1,30 @@
+version: '3.12'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_REDIS_URL=redis://redis:6379/0
+      - DEBUG=True
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
+
+  celery:
+    build: .
+    command: celery -A CeleryRedisProject worker --beat
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_REDIS_URL=redis://redis:6379/0
+      - DEBUG=True
+      - CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True
+    depends_on:
+      - redis
